@@ -15,7 +15,7 @@ import com.example.timeryt.ui.theme.Purple500
 val TIMER_SIZE = 200.dp
 
 const val START_ANGLE = -90f
-const val SWEEP_ANGLE = -330f
+const val SWEEP_ANGLE = -360f
 const val STROKE_WIDTH = 15f
 
 @Composable
@@ -34,7 +34,6 @@ fun Timer(modifier: Modifier) {
                 style = Stroke(width = STROKE_WIDTH)
             )
         }
-
     }
 }
 
