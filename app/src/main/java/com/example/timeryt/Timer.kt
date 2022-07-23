@@ -1,6 +1,5 @@
 package com.example.timeryt
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -20,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
 import com.example.timeryt.ui.theme.GrayLight
 import com.example.timeryt.ui.theme.Purple
@@ -44,7 +44,18 @@ fun Timer(modifier: Modifier, totalTime: Float) {
         mutableStateOf(totalTime)
     }
 
+    var hours by rememberSaveable { mutableStateOf(0) }
+    var minutes by rememberSaveable { mutableStateOf(0) }
+    var seconds by rememberSaveable { mutableStateOf(0) }
+
     Column {
+        CustomTimePicker(hours, minutes, seconds, {
+            hours = it
+        }, {
+            minutes = it
+        }, {
+            seconds = it
+        })
         Box(
             modifier = modifier,
             contentAlignment = Alignment.Center
@@ -82,7 +93,7 @@ fun Timer(modifier: Modifier, totalTime: Float) {
                 color = Color.White
             )
         }
-        Spacer(modifier = Modifier.size(100.dp))
+        Spacer(modifier = Modifier.size(50.dp))
         Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
             Button(
                 modifier = Modifier.size(height = 60.dp, width = 160.dp),
@@ -112,7 +123,9 @@ fun Timer(modifier: Modifier, totalTime: Float) {
                         color = GrayLight,
                         shape = RoundedCornerShape(15.dp)
                     ),
-                onClick = {},
+                onClick = {
+
+                },
                 colors = ButtonDefaults.buttonColors(backgroundColor = GrayLight),
             ) {
                 Text(
@@ -121,7 +134,6 @@ fun Timer(modifier: Modifier, totalTime: Float) {
                 )
             }
         }
-
     }
 }
 
