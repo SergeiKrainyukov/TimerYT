@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -16,7 +17,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
@@ -28,34 +31,29 @@ import kotlinx.coroutines.delay
 @Composable
 fun Timer(modifier: Modifier, totalTime: Float) {
 
-    val startAngle = -90f
-    val strokeWidth = 20f
-    val initialSweepAngle = 350f
-
     var isTimerRunning by rememberSaveable {
         mutableStateOf(false)
     }
 
     var sweepAngle by rememberSaveable {
-        mutableStateOf(initialSweepAngle)
+        mutableStateOf(350f)
     }
 
     var currentTime by rememberSaveable {
         mutableStateOf(totalTime)
     }
 
-    var hours by rememberSaveable { mutableStateOf(0) }
-    var minutes by rememberSaveable { mutableStateOf(0) }
-    var seconds by rememberSaveable { mutableStateOf(0) }
+    var pickerValue by remember { mutableStateOf(FullHours(12, 43, 55)) }
 
-    Column {
-        CustomTimePicker(hours, minutes, seconds, {
-            hours = it
-        }, {
-            minutes = it
-        }, {
-            seconds = it
-        })
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        CustomTimePicker(
+            dividersColor = MaterialTheme.colors.primary,
+            value = pickerValue,
+            textStyle = TextStyle(color = Color.White),
+            onValueChange = {
+                pickerValue = it
+            },
+        )
         Box(
             modifier = modifier,
             contentAlignment = Alignment.Center
@@ -64,7 +62,7 @@ fun Timer(modifier: Modifier, totalTime: Float) {
                 if (sweepAngle > 0 && isTimerRunning) {
                     delay(1000L)
                     currentTime -= 1L
-                    sweepAngle = initialSweepAngle * currentTime / totalTime
+                    sweepAngle = 350f * currentTime / totalTime
                 }
             }
 
@@ -75,15 +73,15 @@ fun Timer(modifier: Modifier, totalTime: Float) {
                     sweepAngle = 360f,
                     useCenter = false,
                     size = Size(size.width, size.height),
-                    style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
+                    style = Stroke(width = 20f, cap = StrokeCap.Round),
                 )
                 drawArc(
                     color = Purple,
-                    startAngle = startAngle,
+                    startAngle = -90f,
                     sweepAngle = sweepAngle,
                     useCenter = false,
                     size = Size(size.width, size.height),
-                    style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                    style = Stroke(width = 20f, cap = StrokeCap.Round)
                 )
             }
             Text(
@@ -99,7 +97,7 @@ fun Timer(modifier: Modifier, totalTime: Float) {
                 modifier = Modifier.size(height = 60.dp, width = 160.dp),
                 onClick = {
                     if (isTimerRunning) {
-                        sweepAngle = initialSweepAngle
+                        sweepAngle = 350f
                         currentTime = totalTime
                     }
                     isTimerRunning = !isTimerRunning
