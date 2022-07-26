@@ -19,39 +19,35 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
 import com.example.timeryt.ui.theme.GrayLight
 import com.example.timeryt.ui.theme.Purple
 import kotlinx.coroutines.delay
 
 @Composable
-fun Timer(modifier: Modifier, totalTime: Float) {
+fun Timer(modifier: Modifier) {
 
     var isTimerRunning by rememberSaveable {
         mutableStateOf(false)
     }
 
     var sweepAngle by rememberSaveable {
-        mutableStateOf(350f)
+        mutableStateOf(360f)
     }
 
-    var currentTime by rememberSaveable {
-        mutableStateOf(totalTime)
-    }
+    var startTime by remember { mutableStateOf(FullHours(0, 0, 0)) }
 
-    var pickerValue by remember { mutableStateOf(FullHours(12, 43, 55)) }
+    var currentTime by remember { mutableStateOf(FullHours(0, 0, 0)) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         CustomTimePicker(
             dividersColor = MaterialTheme.colors.primary,
-            value = pickerValue,
+            value = startTime,
             textStyle = TextStyle(color = Color.White),
             onValueChange = {
-                pickerValue = it
+                startTime = it
             },
         )
         Box(
@@ -61,8 +57,8 @@ fun Timer(modifier: Modifier, totalTime: Float) {
             LaunchedEffect(key1 = sweepAngle, key2 = isTimerRunning) {
                 if (sweepAngle > 0 && isTimerRunning) {
                     delay(1000L)
-                    currentTime -= 1L
-                    sweepAngle = 350f * currentTime / totalTime
+                    currentTime = currentTime.minusSecond()
+                    sweepAngle = 360f * currentTime.toSeconds() / startTime.toSeconds()
                 }
             }
 
@@ -85,7 +81,7 @@ fun Timer(modifier: Modifier, totalTime: Float) {
                 )
             }
             Text(
-                text = currentTime.toInt().toString(),
+                text = currentTime.toSeconds().toString(),
                 fontSize = 44.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
@@ -97,10 +93,16 @@ fun Timer(modifier: Modifier, totalTime: Float) {
                 modifier = Modifier.size(height = 60.dp, width = 160.dp),
                 onClick = {
                     if (isTimerRunning) {
-                        sweepAngle = 350f
-                        currentTime = totalTime
+                        sweepAngle = 360f
+                        currentTime = FullHours(0,0,0)
+                        isTimerRunning = !isTimerRunning
+                        return@Button
                     }
-                    isTimerRunning = !isTimerRunning
+                    if (!isTimerRunning && startTime.toSeconds() > 0) {
+                        currentTime = startTime
+                        isTimerRunning = !isTimerRunning
+                        return@Button
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = if (!isTimerRunning) {
@@ -138,5 +140,5 @@ fun Timer(modifier: Modifier, totalTime: Float) {
 @Preview
 @Composable
 fun Preview() {
-    Timer(modifier = Modifier.size(200.dp), 6f)
+    Timer(modifier = Modifier.size(200.dp))
 }

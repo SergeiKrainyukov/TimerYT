@@ -1,6 +1,5 @@
 package com.example.timeryt
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.LocalTextStyle
@@ -19,7 +18,24 @@ data class FullHours(
     val hours: Int,
     val minutes: Int,
     val seconds: Int
-)
+) {
+    fun toSeconds() = seconds + minutes * 60 + hours * 3600
+
+    fun minusSecond() = fromSeconds(toSeconds() - 1)
+
+    companion object {
+        fun fromSeconds(seconds: Int): FullHours {
+            val hours = seconds / 3600
+            val minutes = (seconds - 3600 * hours) / 60
+            val secondsValue = seconds - hours * 3600 - minutes * 60
+            return FullHours(
+                hours = hours,
+                minutes = minutes,
+                seconds = secondsValue
+            )
+        }
+    }
+}
 
 @Composable
 fun CustomTimePicker(
