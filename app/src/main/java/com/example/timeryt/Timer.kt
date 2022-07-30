@@ -24,6 +24,7 @@ import com.example.timeryt.ui.theme.White
 import kotlinx.coroutines.delay
 
 private const val FULL_SWEEP_ANGLE = 360f
+private val DEFAULT_TIMER_SIZE_DP = 400.dp
 
 @Composable
 fun Timer() {
@@ -41,31 +42,35 @@ fun Timer() {
     var currentTime by remember { mutableStateOf(FullTime()) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        CustomTimePicker(
-            dividersColor = Purple,
-            value = startTime,
-            textStyle = TextStyle(color = White),
-            onValueChange = {
-                startTime = it
-            },
-        )
-        Box(contentAlignment = Alignment.Center) {
-            LaunchedEffect(key1 = sweepAngle, key2 = isTimerRunning) {
-                if (sweepAngle > 0 && isTimerRunning) {
-                    delay(1000L)
-                    currentTime = currentTime.minusSecond()
-                    sweepAngle = calculateSweepAngle(currentTime, startTime)
-                }
-                if (sweepAngle == 0f) {
-                    sweepAngle = FULL_SWEEP_ANGLE
-                    isTimerRunning = false
-                }
-            }
-            TimerView(
-                sweepAngle = sweepAngle,
-                currentTime = currentTime,
+        if (!isTimerRunning)
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.size(DEFAULT_TIMER_SIZE_DP)) {
+            CustomTimePicker(
+                dividersColor = Purple,
+                value = startTime,
+                textStyle = TextStyle(color = White),
+                onValueChange = {
+                    startTime = it
+                },
             )
         }
+        if (isTimerRunning)
+            Box(contentAlignment = Alignment.Center) {
+                LaunchedEffect(key1 = sweepAngle, key2 = isTimerRunning) {
+                    if (sweepAngle > 0 && isTimerRunning) {
+                        delay(1000L)
+                        currentTime = currentTime.minusSecond()
+                        sweepAngle = calculateSweepAngle(currentTime, startTime)
+                    }
+                    if (sweepAngle == 0f) {
+                        sweepAngle = FULL_SWEEP_ANGLE
+                        isTimerRunning = false
+                    }
+                }
+                TimerView(
+                    sweepAngle = sweepAngle,
+                    currentTime = currentTime,
+                )
+            }
         Spacer(modifier = Modifier.size(50.dp))
         Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
             StartButton(isTimerRunning = isTimerRunning) {
@@ -74,7 +79,6 @@ fun Timer() {
                     currentTime = startTime
                 }
                 isTimerRunning = !isTimerRunning
-
             }
             Spacer(modifier = Modifier.size(30.dp))
             StopButton {
@@ -132,7 +136,7 @@ fun TimerView(
 ) {
     Canvas(
         modifier = Modifier
-            .size(400.dp)
+            .size(DEFAULT_TIMER_SIZE_DP)
             .padding(60.dp)
     ) {
         drawArc(
@@ -153,7 +157,7 @@ fun TimerView(
         )
     }
     Text(
-        text = currentTime.toSeconds().toString(),
+        text = currentTime.toString(),
         fontSize = 44.sp,
         fontWeight = FontWeight.Bold,
         color = Color.White
