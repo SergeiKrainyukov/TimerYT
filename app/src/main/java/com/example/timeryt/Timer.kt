@@ -92,44 +92,42 @@ fun Timer(modifier: Modifier) {
             Button(
                 modifier = Modifier.size(height = 60.dp, width = 160.dp),
                 onClick = {
-                    if (isTimerRunning) {
-                        sweepAngle = 360f
-                        currentTime = FullHours(0,0,0)
-                        isTimerRunning = !isTimerRunning
-                        return@Button
-                    }
-                    if (!isTimerRunning && startTime.toSeconds() > 0) {
+                    if (!isTimerRunning && startTime.toSeconds() > 0 && currentTime.toSeconds() == 0) {
                         currentTime = startTime
-                        isTimerRunning = !isTimerRunning
-                        return@Button
                     }
+                    isTimerRunning = !isTimerRunning
                 },
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = if (!isTimerRunning) {
                         Purple
                     } else {
-                        Color.Red
+                        GrayLight
                     }
                 ),
             ) {
-                Text(text = stringResource(id = if (isTimerRunning) R.string.button_stop else R.string.button_start))
+                Text(
+                    text = stringResource(id = if (isTimerRunning) R.string.button_pause else R.string.button_start),
+                    color = Color.White
+                )
             }
             Spacer(modifier = Modifier.size(30.dp))
             Button(
                 modifier = Modifier
-                    .size(height = 60.dp, width = 150.dp)
+                    .size(height = 60.dp, width = 160.dp)
                     .border(
                         width = 2.dp,
-                        color = GrayLight,
+                        color = Color.Red,
                         shape = RoundedCornerShape(15.dp)
                     ),
                 onClick = {
-
+                    sweepAngle = 360f
+                    currentTime = FullHours(0, 0, 0)
+                    isTimerRunning = false
                 },
-                colors = ButtonDefaults.buttonColors(backgroundColor = GrayLight),
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red),
             ) {
                 Text(
-                    text = stringResource(id = if (isTimerRunning) R.string.button_pause else R.string.button_pause),
+                    text = stringResource(id = R.string.button_stop),
                     color = Color.White
                 )
             }
