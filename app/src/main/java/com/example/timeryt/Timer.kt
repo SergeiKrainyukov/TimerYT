@@ -92,6 +92,7 @@ fun Timer(modifier: Modifier) {
             Button(
                 modifier = Modifier.size(height = 60.dp, width = 160.dp),
                 onClick = {
+                    if (startTime.toSeconds() == 0) return@Button
                     if (!isTimerRunning && startTime.toSeconds() > 0 && currentTime.toSeconds() == 0) {
                         currentTime = startTime
                     }
