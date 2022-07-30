@@ -1,4 +1,4 @@
-package com.example.timeryt
+package com.example.timeryt.model
 
 enum class TimerState {
     RUNNING,

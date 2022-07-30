@@ -18,11 +18,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.timeryt.model.FullTime
+import com.example.timeryt.model.TimerState
 import com.example.timeryt.ui.theme.GrayLight
 import com.example.timeryt.ui.theme.Purple
 import com.example.timeryt.ui.theme.White
 import kotlinx.coroutines.delay
-import java.sql.Time
 
 private const val FULL_SWEEP_ANGLE = 360f
 private val DEFAULT_TIMER_SIZE_DP = 400.dp
