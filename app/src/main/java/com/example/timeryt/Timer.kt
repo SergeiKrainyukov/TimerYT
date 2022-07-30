@@ -60,6 +60,10 @@ fun Timer(modifier: Modifier) {
                     currentTime = currentTime.minusSecond()
                     sweepAngle = 360f * currentTime.toSeconds() / startTime.toSeconds()
                 }
+                if (sweepAngle == 0f){
+                    sweepAngle = 360f
+                    isTimerRunning = false
+                }
             }
 
             Canvas(modifier = modifier.padding(60.dp)) {
