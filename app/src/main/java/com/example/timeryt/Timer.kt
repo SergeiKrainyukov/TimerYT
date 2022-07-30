@@ -22,6 +22,7 @@ import com.example.timeryt.ui.theme.GrayLight
 import com.example.timeryt.ui.theme.Purple
 import com.example.timeryt.ui.theme.White
 import kotlinx.coroutines.delay
+import java.sql.Time
 
 private const val FULL_SWEEP_ANGLE = 360f
 private val DEFAULT_TIMER_SIZE_DP = 400.dp
@@ -29,8 +30,8 @@ private val DEFAULT_TIMER_SIZE_DP = 400.dp
 @Composable
 fun Timer() {
 
-    var isTimerRunning by remember {
-        mutableStateOf(false)
+    var timerState by remember {
+        mutableStateOf(TimerState.STOPPED)
     }
 
     var sweepAngle by remember {
@@ -42,49 +43,77 @@ fun Timer() {
     var currentTime by remember { mutableStateOf(FullTime()) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        if (!isTimerRunning)
-        Box(contentAlignment = Alignment.Center, modifier = Modifier.size(DEFAULT_TIMER_SIZE_DP)) {
-            CustomTimePicker(
-                dividersColor = Purple,
-                value = startTime,
-                textStyle = TextStyle(color = White),
-                onValueChange = {
-                    startTime = it
-                },
-            )
-        }
-        if (isTimerRunning)
-            Box(contentAlignment = Alignment.Center) {
-                LaunchedEffect(key1 = sweepAngle, key2 = isTimerRunning) {
-                    if (sweepAngle > 0 && isTimerRunning) {
-                        delay(1000L)
-                        currentTime = currentTime.minusSecond()
-                        sweepAngle = calculateSweepAngle(currentTime, startTime)
-                    }
-                    if (sweepAngle == 0f) {
-                        sweepAngle = FULL_SWEEP_ANGLE
-                        isTimerRunning = false
-                    }
+        when (timerState) {
+            TimerState.STOPPED -> {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.size(DEFAULT_TIMER_SIZE_DP)
+                ) {
+                    CustomTimePicker(
+                        dividersColor = Purple,
+                        value = startTime,
+                        textStyle = TextStyle(color = White),
+                        onValueChange = {
+                            startTime = it
+                        },
+                    )
                 }
-                TimerView(
-                    sweepAngle = sweepAngle,
-                    currentTime = currentTime,
-                )
             }
+            TimerState.RUNNING -> {
+                Box(contentAlignment = Alignment.Center) {
+                    LaunchedEffect(key1 = sweepAngle) {
+                        if (currentTime.isDefault()) {
+                            sweepAngle = FULL_SWEEP_ANGLE
+                            timerState = TimerState.STOPPED
+                        }
+                        if (sweepAngle > 0) {
+                            delay(1000L)
+                            currentTime = currentTime.minusSecond()
+                            sweepAngle = calculateSweepAngle(currentTime, startTime)
+                        }
+                    }
+                    TimerView(
+                        sweepAngle = sweepAngle,
+                        currentTime = currentTime,
+                    )
+                }
+            }
+            TimerState.PAUSED -> {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.size(DEFAULT_TIMER_SIZE_DP)
+                ) {
+                    TimerView(
+                        sweepAngle = sweepAngle,
+                        currentTime = currentTime,
+                    )
+                }
+            }
+        }
         Spacer(modifier = Modifier.size(50.dp))
         Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
-            StartButton(isTimerRunning = isTimerRunning) {
-                if (startTime.isDefault()) return@StartButton
-                if (!isTimerRunning && currentTime.isDefault()) {
-                    currentTime = startTime
+            StartButton(timerState = timerState) {
+                when (timerState) {
+                    TimerState.RUNNING -> {
+                        timerState = TimerState.PAUSED
+                        return@StartButton
+                    }
+                    TimerState.PAUSED -> {
+                        timerState = TimerState.RUNNING
+                        return@StartButton
+                    }
+                    TimerState.STOPPED -> {
+                        currentTime = startTime
+                        timerState = TimerState.RUNNING
+                        return@StartButton
+                    }
                 }
-                isTimerRunning = !isTimerRunning
             }
             Spacer(modifier = Modifier.size(30.dp))
             StopButton {
                 sweepAngle = FULL_SWEEP_ANGLE
                 currentTime = FullTime()
-                isTimerRunning = false
+                timerState = TimerState.STOPPED
             }
         }
     }
@@ -92,22 +121,32 @@ fun Timer() {
 
 @Composable
 fun StartButton(
-    isTimerRunning: Boolean,
+    timerState: TimerState,
     onClick: () -> Unit
 ) {
-    Button(
+    if (timerState == TimerState.RUNNING)
+        Button(
+            modifier = Modifier.size(height = 60.dp, width = 160.dp),
+            onClick = onClick,
+            colors = ButtonDefaults.buttonColors(backgroundColor = GrayLight),
+        ) {
+            Text(
+                text = stringResource(id = R.string.button_pause),
+                color = Color.White
+            )
+        } else Button(
         modifier = Modifier.size(height = 60.dp, width = 160.dp),
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = if (!isTimerRunning) {
-                Purple
-            } else {
+            backgroundColor = if (timerState == TimerState.RUNNING) {
                 GrayLight
+            } else {
+                Purple
             }
         ),
     ) {
         Text(
-            text = stringResource(id = if (isTimerRunning) R.string.button_pause else R.string.button_start),
+            text = stringResource(id = if (timerState == TimerState.RUNNING) R.string.button_pause else R.string.button_start),
             color = Color.White
         )
     }
