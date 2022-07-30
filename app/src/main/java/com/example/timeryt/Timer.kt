@@ -29,11 +29,11 @@ import kotlinx.coroutines.delay
 @Composable
 fun Timer(modifier: Modifier) {
 
-    var isTimerRunning by rememberSaveable {
+    var isTimerRunning by remember {
         mutableStateOf(false)
     }
 
-    var sweepAngle by rememberSaveable {
+    var sweepAngle by remember {
         mutableStateOf(360f)
     }
 
@@ -60,84 +60,102 @@ fun Timer(modifier: Modifier) {
                     currentTime = currentTime.minusSecond()
                     sweepAngle = 360f * currentTime.toSeconds() / startTime.toSeconds()
                 }
-                if (sweepAngle == 0f){
+                if (sweepAngle == 0f) {
                     sweepAngle = 360f
                     isTimerRunning = false
                 }
             }
-
-            Canvas(modifier = modifier.padding(60.dp)) {
-                drawArc(
-                    color = GrayLight,
-                    startAngle = 360f,
-                    sweepAngle = 360f,
-                    useCenter = false,
-                    size = Size(size.width, size.height),
-                    style = Stroke(width = 20f, cap = StrokeCap.Round),
-                )
-                drawArc(
-                    color = Purple,
-                    startAngle = -90f,
-                    sweepAngle = sweepAngle,
-                    useCenter = false,
-                    size = Size(size.width, size.height),
-                    style = Stroke(width = 20f, cap = StrokeCap.Round)
-                )
-            }
-            Text(
-                text = currentTime.toSeconds().toString(),
-                fontSize = 44.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
+            TimerView(sweepAngle = sweepAngle, currentTime = currentTime, modifier = modifier)
         }
         Spacer(modifier = Modifier.size(50.dp))
         Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
-            Button(
-                modifier = Modifier.size(height = 60.dp, width = 160.dp),
-                onClick = {
-                    if (startTime.toSeconds() == 0) return@Button
-                    if (!isTimerRunning && startTime.toSeconds() > 0 && currentTime.toSeconds() == 0) {
-                        currentTime = startTime
-                    }
-                    isTimerRunning = !isTimerRunning
-                },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = if (!isTimerRunning) {
-                        Purple
-                    } else {
-                        GrayLight
-                    }
-                ),
-            ) {
-                Text(
-                    text = stringResource(id = if (isTimerRunning) R.string.button_pause else R.string.button_start),
-                    color = Color.White
-                )
+            StartButton(isTimerRunning = isTimerRunning) {
+                if (startTime.toSeconds() == 0) return@StartButton
+                if (!isTimerRunning && startTime.toSeconds() > 0 && currentTime.toSeconds() == 0) {
+                    currentTime = startTime
+                }
+                isTimerRunning = !isTimerRunning
+
             }
             Spacer(modifier = Modifier.size(30.dp))
-            Button(
-                modifier = Modifier
-                    .size(height = 60.dp, width = 160.dp)
-                    .border(
-                        width = 2.dp,
-                        color = Color.Red,
-                        shape = RoundedCornerShape(15.dp)
-                    ),
-                onClick = {
-                    sweepAngle = 360f
-                    currentTime = FullHours(0, 0, 0)
-                    isTimerRunning = false
-                },
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red),
-            ) {
-                Text(
-                    text = stringResource(id = R.string.button_stop),
-                    color = Color.White
-                )
+            StopButton {
+                sweepAngle = 360f
+                currentTime = FullHours(0, 0, 0)
+                isTimerRunning = false
             }
         }
     }
+}
+
+@Composable
+fun StartButton(
+    isTimerRunning: Boolean,
+    onClick: () -> Unit
+) {
+    Button(
+        modifier = Modifier.size(height = 60.dp, width = 160.dp),
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = if (!isTimerRunning) {
+                Purple
+            } else {
+                GrayLight
+            }
+        ),
+    ) {
+        Text(
+            text = stringResource(id = if (isTimerRunning) R.string.button_pause else R.string.button_start),
+            color = Color.White
+        )
+    }
+}
+
+@Composable
+fun StopButton(
+    onClick: () -> Unit
+) {
+    Button(
+        modifier = Modifier.size(height = 60.dp, width = 160.dp),
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red),
+    ) {
+        Text(
+            text = stringResource(id = R.string.button_stop),
+            color = Color.White
+        )
+    }
+}
+
+@Composable
+fun TimerView(
+    sweepAngle: Float,
+    currentTime: FullHours,
+    modifier: Modifier
+) {
+    Canvas(modifier = modifier.padding(60.dp)) {
+        drawArc(
+            color = GrayLight,
+            startAngle = 360f,
+            sweepAngle = 360f,
+            useCenter = false,
+            size = Size(size.width, size.height),
+            style = Stroke(width = 20f, cap = StrokeCap.Round),
+        )
+        drawArc(
+            color = Purple,
+            startAngle = -90f,
+            sweepAngle = sweepAngle,
+            useCenter = false,
+            size = Size(size.width, size.height),
+            style = Stroke(width = 20f, cap = StrokeCap.Round)
+        )
+    }
+    Text(
+        text = currentTime.toSeconds().toString(),
+        fontSize = 44.sp,
+        fontWeight = FontWeight.Bold,
+        color = Color.White
+    )
 }
 
 @Preview
