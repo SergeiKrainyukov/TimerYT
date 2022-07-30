@@ -4,4 +4,8 @@
     <string name="button_start">Start</string>
     <string name="button_stop">Stop</string>
     <string name="button_pause">Pause</string>
+
+    <string name="hours">час</string>
+    <string name="minutes">мин</string>
+    <string name="seconds">сек</string>
 </resources>

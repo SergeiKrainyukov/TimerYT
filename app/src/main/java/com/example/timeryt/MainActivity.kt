@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    Timer(modifier = Modifier.size(400.dp))
+                    Timer()
                 }
             }
         }

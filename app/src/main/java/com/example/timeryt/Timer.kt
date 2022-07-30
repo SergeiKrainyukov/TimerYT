@@ -1,15 +1,11 @@
 package com.example.timeryt
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
@@ -24,54 +20,57 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.timeryt.ui.theme.GrayLight
 import com.example.timeryt.ui.theme.Purple
+import com.example.timeryt.ui.theme.White
 import kotlinx.coroutines.delay
 
+private const val FULL_SWEEP_ANGLE = 360f
+
 @Composable
-fun Timer(modifier: Modifier) {
+fun Timer() {
 
     var isTimerRunning by remember {
         mutableStateOf(false)
     }
 
     var sweepAngle by remember {
-        mutableStateOf(360f)
+        mutableStateOf(FULL_SWEEP_ANGLE)
     }
 
-    var startTime by remember { mutableStateOf(FullHours(0, 0, 0)) }
+    var startTime by remember { mutableStateOf(FullTime()) }
 
-    var currentTime by remember { mutableStateOf(FullHours(0, 0, 0)) }
+    var currentTime by remember { mutableStateOf(FullTime()) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         CustomTimePicker(
-            dividersColor = MaterialTheme.colors.primary,
+            dividersColor = Purple,
             value = startTime,
-            textStyle = TextStyle(color = Color.White),
+            textStyle = TextStyle(color = White),
             onValueChange = {
                 startTime = it
             },
         )
-        Box(
-            modifier = modifier,
-            contentAlignment = Alignment.Center
-        ) {
+        Box(contentAlignment = Alignment.Center) {
             LaunchedEffect(key1 = sweepAngle, key2 = isTimerRunning) {
                 if (sweepAngle > 0 && isTimerRunning) {
                     delay(1000L)
                     currentTime = currentTime.minusSecond()
-                    sweepAngle = 360f * currentTime.toSeconds() / startTime.toSeconds()
+                    sweepAngle = calculateSweepAngle(currentTime, startTime)
                 }
                 if (sweepAngle == 0f) {
-                    sweepAngle = 360f
+                    sweepAngle = FULL_SWEEP_ANGLE
                     isTimerRunning = false
                 }
             }
-            TimerView(sweepAngle = sweepAngle, currentTime = currentTime, modifier = modifier)
+            TimerView(
+                sweepAngle = sweepAngle,
+                currentTime = currentTime,
+            )
         }
         Spacer(modifier = Modifier.size(50.dp))
         Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
             StartButton(isTimerRunning = isTimerRunning) {
-                if (startTime.toSeconds() == 0) return@StartButton
-                if (!isTimerRunning && startTime.toSeconds() > 0 && currentTime.toSeconds() == 0) {
+                if (startTime.isDefault()) return@StartButton
+                if (!isTimerRunning && currentTime.isDefault()) {
                     currentTime = startTime
                 }
                 isTimerRunning = !isTimerRunning
@@ -79,8 +78,8 @@ fun Timer(modifier: Modifier) {
             }
             Spacer(modifier = Modifier.size(30.dp))
             StopButton {
-                sweepAngle = 360f
-                currentTime = FullHours(0, 0, 0)
+                sweepAngle = FULL_SWEEP_ANGLE
+                currentTime = FullTime()
                 isTimerRunning = false
             }
         }
@@ -129,21 +128,24 @@ fun StopButton(
 @Composable
 fun TimerView(
     sweepAngle: Float,
-    currentTime: FullHours,
-    modifier: Modifier
+    currentTime: FullTime,
 ) {
-    Canvas(modifier = modifier.padding(60.dp)) {
+    Canvas(
+        modifier = Modifier
+            .size(400.dp)
+            .padding(60.dp)
+    ) {
         drawArc(
             color = GrayLight,
-            startAngle = 360f,
-            sweepAngle = 360f,
+            startAngle = FULL_SWEEP_ANGLE,
+            sweepAngle = FULL_SWEEP_ANGLE,
             useCenter = false,
             size = Size(size.width, size.height),
             style = Stroke(width = 20f, cap = StrokeCap.Round),
         )
         drawArc(
             color = Purple,
-            startAngle = -90f,
+            startAngle = -FULL_SWEEP_ANGLE / 4,
             sweepAngle = sweepAngle,
             useCenter = false,
             size = Size(size.width, size.height),
@@ -158,8 +160,11 @@ fun TimerView(
     )
 }
 
+private fun calculateSweepAngle(currentTime: FullTime, startTime: FullTime) =
+    FULL_SWEEP_ANGLE * currentTime.toSeconds() / startTime.toSeconds()
+
 @Preview
 @Composable
 fun Preview() {
-    Timer(modifier = Modifier.size(200.dp))
+    Timer()
 }
